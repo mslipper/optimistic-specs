@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { Contract, ContractFactory, Signer, BigNumber } from 'ethers'
 import { applyL1ToL2Alias } from '@eth-optimism/core-utils'
+import { decodeDepositEvent } from '../utils'
 
 import { DepositFeed__factory, DepositFeed } from '../../typechain'
 
@@ -11,34 +12,6 @@ const NON_ZERO_ADDRESS = '0x' + '11'.repeat(20)
 const NON_ZERO_GASLIMIT = BigNumber.from(50_000)
 const NON_ZERO_VALUE = BigNumber.from(100)
 const NON_ZERO_DATA = '0x' + '11'.repeat(42)
-
-const decodeDepositEvent = async (
-  depositFeed: DepositFeed
-): Promise<{
-  from: string
-  to: string
-  mint: BigNumber
-  value: BigNumber
-  gasLimit: BigNumber
-  isCreation: boolean
-  data: string
-}> => {
-  const events = await depositFeed.queryFilter(
-    depositFeed.filters.TransactionDeposited()
-  )
-
-  const eventArgs = events[events.length - 1].args
-
-  return {
-    from: eventArgs.from,
-    to: eventArgs.to,
-    mint: eventArgs.mint,
-    value: eventArgs.value,
-    gasLimit: eventArgs.gasLimit,
-    isCreation: eventArgs.isCreation,
-    data: eventArgs.data,
-  }
-}
 
 describe('DepositFeed', () => {
   let signer: Signer
@@ -64,7 +37,7 @@ describe('DepositFeed', () => {
 
   describe('Should emit the correct log values...', async () => {
     it('when an EOA deposits a transaction with 0 value.', async () => {
-      const receipt = await(
+      const receipt = await (
         await depositFeed.depositTransaction(
           NON_ZERO_ADDRESS,
           ZERO_BIGNUMBER,
