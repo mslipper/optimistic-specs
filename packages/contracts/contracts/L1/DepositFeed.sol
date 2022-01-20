@@ -40,7 +40,7 @@ contract DepositFeed {
         uint256 _value,
         uint256 _gasLimit,
         bool _isCreation,
-        bytes memory _data
+        bytes calldata _data
     ) external payable {
         if (_isCreation && _to != address(0)) {
             revert NonZeroCreationTarget();
