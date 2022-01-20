@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { Signer, BigNumber } from 'ethers'
 import { applyL1ToL2Alias } from '@eth-optimism/core-utils'
-import { decodeDepositEvent, GasMeasurement } from '../utils'
+import { GasMeasurement, erc20DepositData } from '../utils'
 
 import { DepositFeed__factory, DepositFeed } from '../../typechain'
 
@@ -25,21 +25,41 @@ describe('DepositFeed Gas Costs', () => {
     await gm.init(signer)
   })
 
-  it('when a contract deposits a transaction with 0 value.', async () => {
+  it('Simulated ERC20 deposit data', async () => {
     const cost = await gm.getGasCost(
       depositFeed,
+      ZERO_BIGNUMBER,
       'depositTransaction(address,uint256,uint256,bool,bytes)',
-      [NON_ZERO_ADDRESS, NON_ZERO_VALUE, NON_ZERO_GASLIMIT, false, '0x']
+      [
+        NON_ZERO_ADDRESS,
+        ZERO_BIGNUMBER,
+        NON_ZERO_GASLIMIT,
+        false,
+        erc20DepositData,
+      ]
     )
-    console.log('gasUsed:', cost)
+    console.log('gasUsed:', cost.toString())
   })
 
-  it('when a contract deposits a transaction with 0 value.', async () => {
-    const cost = await gm.getGasCost(
-      depositFeed,
-      'depositTransaction(address,uint256,uint256,bool,bytes)',
-      [ZERO_ADDRESS, NON_ZERO_VALUE, NON_ZERO_GASLIMIT, true, '0x']
-    )
-    console.log('gasUsed:', cost)
+  describe('Lowest cost scenarios', () => {
+    it('Depositing a transaction with zero value and no data', async () => {
+      const cost = await gm.getGasCost(
+        depositFeed,
+        ZERO_BIGNUMBER,
+        'depositTransaction(address,uint256,uint256,bool,bytes)',
+        [NON_ZERO_ADDRESS, NON_ZERO_VALUE, NON_ZERO_GASLIMIT, false, '0x']
+      )
+      console.log('gasUsed:', cost.toString())
+    })
+
+    it('Depositing a creation with 0 value.', async () => {
+      const cost = await gm.getGasCost(
+        depositFeed,
+        ZERO_BIGNUMBER,
+        'depositTransaction(address,uint256,uint256,bool,bytes)',
+        [ZERO_ADDRESS, NON_ZERO_VALUE, NON_ZERO_GASLIMIT, true, NON_ZERO_DATA]
+      )
+      console.log('gasUsed:', cost.toString())
+    })
   })
 })
