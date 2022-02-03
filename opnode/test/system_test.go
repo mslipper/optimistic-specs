@@ -121,7 +121,7 @@ func TestSystemE2E(t *testing.T) {
 			Color:  true,
 			Format: "text",
 		},
-		L1NodeAddrs:   []string{endpoint(cfg.l1.nodeConfig)},
+		L1NodeAddr:    endpoint(cfg.l1.nodeConfig),
 		L2EngineAddrs: []string{endpoint(cfg.l2.nodeConfig)},
 	}
 	err = node.Run(context.Background())

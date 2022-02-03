@@ -39,7 +39,7 @@ func (conf *GenesisConf) GetGenesis() rollup.Genesis {
 }
 
 type OpNodeCmd struct {
-	L1NodeAddrs   []string `ask:"--l1" help:"Addresses of L1 User JSON-RPC endpoints to use (eth namespace required)"`
+	L1NodeAddr    string   `ask:"--l1" help:"Address of L1 User JSON-RPC endpoints to use (eth namespace required)"`
 	L2EngineAddrs []string `ask:"--l2" help:"Addresses of L2 Engine JSON-RPC endpoints to use (engine and eth namespace required)"`
 
 	LogCmd `ask:".log" help:"Log configuration"`
@@ -65,7 +65,7 @@ type OpNodeCmd struct {
 }
 
 func (c *OpNodeCmd) Default() {
-	c.L1NodeAddrs = []string{"http://127.0.0.1:8545"}
+	c.L1NodeAddr = "http://127.0.0.1:8545"
 	c.L2EngineAddrs = []string{"http://127.0.0.1:8551"}
 }
 
@@ -82,28 +82,19 @@ func (c *OpNodeCmd) Run(ctx context.Context, args ...string) error {
 		return errors.New("genesis configuration required")
 	}
 
-	l1Sources := make([]eth.L1Source, 0, len(c.L1NodeAddrs))
-	for i, addr := range c.L1NodeAddrs {
-		// L1 exec engine: read-only, to update L2 consensus with
-		l1Node, err := rpc.DialContext(ctx, addr)
-		if err != nil {
-			// HTTP or WS RPC may create a disconnected client, RPC over IPC may fail directly
-			if l1Node == nil {
-				return fmt.Errorf("failed to dial L1 address %d (%s): %v", i, addr, err)
-			}
-			c.log.Warn("failed to dial L1 address, but may connect later", "i", i, "addr", addr, "err", err)
+	// L1 exec engine: read-only, to update L2 consensus with
+	l1Node, err := rpc.DialContext(ctx, c.L1NodeAddr)
+	if err != nil {
+		// HTTP or WS RPC may create a disconnected client, RPC over IPC may fail directly
+		if l1Node == nil {
+			return fmt.Errorf("failed to dial L1 address (%s): %v", c.L1NodeAddr, err)
 		}
-		// TODO: we may need to authenticate the connection with L1
-		// l1Node.SetHeader()
-		cl := ethclient.NewClient(l1Node)
-		l1Sources = append(l1Sources, cl)
+		c.log.Warn("failed to dial L1 address, but may connect later", "addr", c.L1NodeAddr, "err", err)
 	}
-	if len(l1Sources) == 0 {
-		return fmt.Errorf("need at least one L1 source endpoint, see --l1")
-	}
-
+	// TODO: we may need to authenticate the connection with L1
+	// l1Node.SetHeader()
+	c.l1Source = ethclient.NewClient(l1Node)
 	// Combine L1 sources, so work can be balanced between them
-	c.l1Source = eth.NewCombinedL1Source(l1Sources)
 	l1CanonicalChain := eth.CanonicalChain(c.l1Source)
 
 	c.l1Downloader = l1.NewDownloader(c.l1Source)
