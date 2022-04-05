@@ -292,13 +292,13 @@ cf. [Deposits Specification](deposits.md)
 
 [withdrawals]: glossary.md#withdrawals
 
-In general, a withdrawal is a transaction sent from L2 to L1 that may transfer of data and/or value.
+In general, a withdrawal is a transaction sent from L2 to L1 that may transfer data and/or value.
 
-This term *withdrawal* is somewhat ambiguous as these "transactions" exist at multiple levels. In order to differentiate
+The term *withdrawal* is somewhat ambiguous as these "transactions" exist at multiple levels. In order to differentiate
  between the L1 and L2 components of a withdrawal we introduce the following terms:
 
 - A *withdrawing* call or transaction occurs on L2 and initiates a withdrawal.
-- A *withdrawn* call or transaction occurs on l1 as the result of an withdrawal being relayed on L1.
+- A *withdrawn* call or transaction occurs on L1 as the result of withdrawal initiating transaction being relayed on L1.
 
 ## Relayer
 

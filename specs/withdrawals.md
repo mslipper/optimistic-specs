@@ -11,8 +11,8 @@
 [g-execution-engine]: glossary.md#execution-engine
 **Table of Contents**
 
-[Withdrawals][g-withdrawal] are cross domain transactions which are initiated on L2, and finalized by a transaction
-executed on L1. They may be used to transfer data and/or ETH from L1 to L2.
+[Withdrawals][g-withdrawal] are cross-domain transactions which are initiated on L2, and finalized by a transaction
+executed on L1. They can be most notably be used in order to make L2 contracts call an L1 contract, or to transfer ETH from an L2 account to an L1 account.
 
 **Vocabulary note**: *withdrawal* can refer to the transaction at various stages of the process, but we introduce
 more specific terms to differentiate between the transaction
@@ -21,8 +21,8 @@ more specific terms to differentiate between the transaction
 - *withdrawal finalizing transaction* refers specifically to an L1 transaction which finalizes and relays the
   withdrawal.
 
-Withdrawals are initiated on L2 via a call to the Withdrawals predeploy contract, which records the important properties
-of the message in its storage. Withdrawals are finalized on L1 via a call to the `L2WithdrawalVerifier` contract, which
+Withdrawals are initiated on L2 via a call to the `Withdrawer` predeploy contract, which records the important properties
+of the message in its storage. Withdrawals are finalized on L1 via a call to the `WithdrawalVerifier` contract, which
 proves the inclusion of this withdrawal message.
 
 In this way, withdrawals are different from [deposits][g-deposits] which make use of a special transaction type in the
@@ -98,7 +98,7 @@ to be withdrawn.
 
 It contains a mapping which records withdrawals.
 
-```js
+```solidity
 interface Withdrawer {
 
     event WithdrawalMessage(
@@ -116,7 +116,7 @@ interface Withdrawer {
         uint256 gasLimit
     ) external payable;
 
-    function burn();
+    function burn() external;
 }
 ```
 
@@ -167,7 +167,7 @@ This `FINALIZATION_WINDOW` value is equivalent to 7 days.
 
 1. A `WithdrawalMessage` is encoded in a struct as follows:
 
-    ```js
+    ```solidity
     struct WithdrawalMessage {
         uint256 nonce;
         address sender;
@@ -190,7 +190,7 @@ This `FINALIZATION_WINDOW` value is equivalent to 7 days.
 
 1. A `WithdrawalMessageInclusionProof` is an MPT proof encoded in a struct as follows:
 
-   ```js
+   ```solidity
    struct WithdrawalMessageInclusionProof {
        WithdrawalMessage message;
        bytes32 l2withdrawalsRoot;
