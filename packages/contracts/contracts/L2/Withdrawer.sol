@@ -6,7 +6,6 @@ import {
     AddressAliasHelper
 } from "../../lib/optimism/packages/contracts/contracts/standards/AddressAliasHelper.sol";
 
-
 /**
  * @title Withdrawer
  * @notice The Withdrawer contract facilitates sending both ETH value and data from L2 to L1.
@@ -37,6 +36,11 @@ contract Withdrawer {
         bytes data
     );
 
+    /// @notice Emitted when the balance of this contract is burned.
+    event WithdrawerBalanceBurnt(
+        uint256 indexed amount
+    );
+
     /**
      * @notice Initiates a withdrawal to execute on L1.
      * @param _target Address to call on L1 execution.
@@ -48,7 +52,6 @@ contract Withdrawer {
         uint256 _gasLimit,
         bytes calldata _data
     ) external payable {
-
         address from = msg.sender;
         // Transform the from-address to its L1 alias if the caller is a contract.
         if (msg.sender != tx.origin) {
@@ -58,9 +61,9 @@ contract Withdrawer {
             abi.encode(nonce, msg.sender, _target, msg.value, _gasLimit, _data)
         );
         withdrawals[withdrawalHash] = true;
-        nonce++;
 
-        emit WithdrawalInitiated(nonce, msg.sender, _target, msg.value, _gasLimit, _data);
+        emit WithdrawalInitiated(nonce, from, _target, msg.value, _gasLimit, _data);
+        nonce++;
     }
 
     /**
