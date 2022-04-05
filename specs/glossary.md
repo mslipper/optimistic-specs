@@ -304,7 +304,7 @@ The term *withdrawal* is somewhat ambiguous as these "transactions" exist at mul
 
 [relayer]: glossary.md#withdrawals
 
-An EOA on L1 which finalizes a withdrawal by providing submitting the data necessary to verify its inclusion on L2.
+An EOA on L1 which finalizes a withdrawal by submitting the data necessary to verify its inclusion on L2.
 
 ------------------------------------------------------------------------------------------------------------------------
 
